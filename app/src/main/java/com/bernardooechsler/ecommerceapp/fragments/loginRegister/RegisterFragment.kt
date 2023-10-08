@@ -1,7 +1,64 @@
 package com.bernardooechsler.ecommerceapp.fragments.loginRegister
 
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.bernardooechsler.ecommerceapp.R
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import com.bernardooechsler.ecommerceapp.data.User
+import com.bernardooechsler.ecommerceapp.databinding.FragmentRegisterBinding
+import com.bernardooechsler.ecommerceapp.util.Resource
+import com.bernardooechsler.ecommerceapp.viewmodel.RegisterViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
 
-class RegisterFragment: Fragment(R.layout.fragment_register) {
+@AndroidEntryPoint
+class RegisterFragment : Fragment() {
+
+    private lateinit var binding: FragmentRegisterBinding
+    private val viewModel by viewModels<RegisterViewModel>()
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        binding = FragmentRegisterBinding.inflate(inflater)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.apply {
+            buttonRegisterRegister.setOnClickListener {
+                val user = User(
+                    edFirstNameRegister.text.toString().trim(),
+                    edLastNameRegister.text.toString().trim(),
+                    edEmailRegister.text.toString().trim(),
+                )
+                val password = edPasswordRegister.text.toString()
+
+                viewModel.createAccountWithEmailAndPassword(user, password)
+            }
+        }
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.register.collect {
+                when (it) {
+                    is Resource.Loading -> {
+                        binding.buttonRegisterRegister.startAnimation()
+                    }
+                    is Resource.Success -> {
+                        binding.buttonRegisterRegister.revertAnimation()
+                    }
+                    is Resource.Error -> {
+                        binding.buttonRegisterRegister.revertAnimation()
+                    }
+                }
+            }
+        }
+    }
 }
