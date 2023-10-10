@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/login_register_graph"
-    app:startDestination="@id/registerFragment">
+    app:startDestination="@id/introductionFragment">
 
     <fragment
         android:id="@+id/introductionFragment"
@@ -44,7 +44,7 @@
 
     <fragment
         android:id="@+id/accountOptionsFragment"
-        android:name="com.bernardooechsler.ecommerceapp.fragments.loginRegister.AccountFragment"
+        android:name="com.bernardooechsler.ecommerceapp.fragments.loginRegister.AccountOptionsFragment"
         android:label="AccountOptionsFragment"
         tools:layout="@layout/fragment_account_options">
         <action
