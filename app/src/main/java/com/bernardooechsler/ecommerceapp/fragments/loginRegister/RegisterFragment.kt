@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -62,6 +63,7 @@ class RegisterFragment : Fragment() {
 
                     is Resource.Success -> {
                         binding.buttonRegisterRegister.revertAnimation()
+                        Toast.makeText(context, "Account registered", Toast.LENGTH_SHORT).show()
                     }
 
                     is Resource.Error -> {
@@ -75,10 +77,16 @@ class RegisterFragment : Fragment() {
 
         lifecycleScope.launchWhenStarted {
             viewModel.validation.collect { validation ->
+                if (validation.allFields is RegisterValidation.Failed) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(context, validation.allFields.message, Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                }
+
                 if (validation.email is RegisterValidation.Failed) {
                     withContext(Dispatchers.Main) {
                         binding.edEmailRegister.apply {
-                            requestFocus()
                             error = validation.email.message
                         }
                     }
@@ -87,8 +95,23 @@ class RegisterFragment : Fragment() {
                 if (validation.password is RegisterValidation.Failed) {
                     withContext(Dispatchers.Main) {
                         binding.edPasswordRegister.apply {
-                            requestFocus()
                             error = validation.password.message
+                        }
+                    }
+                }
+
+                if (validation.firsName is RegisterValidation.Failed) {
+                    withContext(Dispatchers.Main) {
+                        binding.edFirstNameRegister.apply {
+                            error = validation.firsName.message
+                        }
+                    }
+                }
+
+                if (validation.lastName is RegisterValidation.Failed) {
+                    withContext(Dispatchers.Main) {
+                        binding.edLastNameRegister.apply {
+                            error = validation.lastName.message
                         }
                     }
                 }

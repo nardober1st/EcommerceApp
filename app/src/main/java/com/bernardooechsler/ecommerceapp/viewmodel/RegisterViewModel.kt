@@ -6,10 +6,12 @@ import com.bernardooechsler.ecommerceapp.util.Constants.USER_COLLECTION
 import com.bernardooechsler.ecommerceapp.util.RegisterFieldsState
 import com.bernardooechsler.ecommerceapp.util.RegisterValidation
 import com.bernardooechsler.ecommerceapp.util.Resource
+import com.bernardooechsler.ecommerceapp.util.validateAllFields
 import com.bernardooechsler.ecommerceapp.util.validateEmail
+import com.bernardooechsler.ecommerceapp.util.validateFirstName
+import com.bernardooechsler.ecommerceapp.util.validateLastName
 import com.bernardooechsler.ecommerceapp.util.validatePassword
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -31,7 +33,10 @@ class RegisterViewModel @Inject constructor(
     private val _validation = Channel<RegisterFieldsState>()
     val validation = _validation.receiveAsFlow()
 
-    fun createAccountWithEmailAndPassword(user: User, password: String) {
+    fun createAccountWithEmailAndPassword(
+        user: User,
+        password: String
+    ) {
         if (checkValidation(user, password)) {
             runBlocking {
                 _register.emit(Resource.Loading())
@@ -47,8 +52,11 @@ class RegisterViewModel @Inject constructor(
                 }
         } else {
             val registerFieldsState = RegisterFieldsState(
+                validateAllFields(user.firstName, user.lastName, user.email, password),
                 validateEmail(user.email),
-                validatePassword(password)
+                validatePassword(password),
+                validateFirstName(user.firstName),
+                validateLastName(user.lastName)
             )
             runBlocking {
                 _validation.send(registerFieldsState)
@@ -69,11 +77,13 @@ class RegisterViewModel @Inject constructor(
     }
 
     private fun checkValidation(user: User, password: String): Boolean {
+        val allFields = validateAllFields(user.firstName, user.lastName, user.email, password)
         val emailValidation = validateEmail(user.email)
         val passwordValidation = validatePassword(password)
-        val shouldRegister =
-            emailValidation is RegisterValidation.Success && passwordValidation is RegisterValidation.Success
+        val firstName = validateFirstName(user.firstName)
+        val lastName = validateLastName(user.lastName)
 
-        return shouldRegister
+        return (emailValidation is RegisterValidation.Success && passwordValidation is RegisterValidation.Success
+                && allFields is RegisterValidation.Success && firstName is RegisterValidation.Success && lastName is RegisterValidation.Success)
     }
 }

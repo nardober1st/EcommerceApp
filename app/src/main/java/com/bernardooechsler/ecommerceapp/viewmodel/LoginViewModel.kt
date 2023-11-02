@@ -36,6 +36,8 @@ class LoginViewModel @Inject constructor(
             }
             .addOnFailureListener {
                 viewModelScope.launch {
+                    var message = it.message
+                    message = "Login Failed"
                     _login.emit(Resource.Error(it.message.toString()))
                 }
             }
