@@ -71,25 +71,25 @@ class MainCategoryViewModel @Inject constructor(
     }
 
     fun fetchBestProducts() {
-//        if (!pagingInfo.isPagingEnd) {
+        if (!pagingInfo.isPagingEnd) {
             viewModelScope.launch {
                 _bestProducts.emit(Resource.Loading())
                 firestore.collection("Products").limit(pagingInfo.bestProductsPage * 10).get()
                     .addOnSuccessListener { result ->
                         val bestProducts = result.toObjects(Product::class.java)
-//                        pagingInfo.isPagingEnd = bestProducts == pagingInfo.oldBestProducts
-//                        pagingInfo.oldBestProducts = bestProducts
+                        pagingInfo.isPagingEnd = bestProducts == pagingInfo.oldBestProducts
+                        pagingInfo.oldBestProducts = bestProducts
                         viewModelScope.launch {
                             _bestProducts.emit(Resource.Success(bestProducts))
                         }
-//                        pagingInfo.bestProductsPage++
+                        pagingInfo.bestProductsPage++
                     }.addOnFailureListener {
                         viewModelScope.launch {
                             _bestProducts.emit(Resource.Error(it.message.toString()))
                         }
                     }
             }
-//        }
+        }
     }
 }
 
